@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { configSchema as schema, PUBLICATION_META_FIELDS, type ConfigInput, type ConfigValues as Values } from '@/lib/schemas/admin';
+import { configSchema as schema, PUBLICATION_META_FIELDS, type ConfigValues as Values } from '@/lib/schemas/admin';
 import { api } from '@/lib/api-client';
 import { useAction } from '@/lib/actions';
 import type { PortalConfig } from '@/types/domain';

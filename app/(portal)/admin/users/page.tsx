@@ -11,7 +11,6 @@ import { api } from '@/lib/api-client';
 import { useAction } from '@/lib/actions';
 import { ROLE_LABELS, type Role } from '@/lib/constants/roles';
 import { formatDate, formatDateTime } from '@/lib/format';
-import { emailSchema } from '@/lib/schemas/auth';
 import { useMe } from '@/hooks/use-auth';
 import { useListState } from '@/hooks/use-list-state';
 import type { AdminUserRow } from '@/types/domain';

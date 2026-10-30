@@ -1,5 +1,8 @@
 'use client';
 
+import { FieldValidation } from '@/components/forms/field-validation';
+import { reviewCommentSchema } from '@/lib/schemas/editorial';
+import { firstError } from '@/lib/validation';
 import { useState } from 'react';
 import { FileText, Lock, Save } from 'lucide-react';
 import { api } from '@/lib/api-client';
@@ -90,6 +93,7 @@ function ReviewsInner({ article }: { article: EditorArticleDetail }) {
                     <div className="space-y-1">
                       <label htmlFor={`edit-${c.id}`} className="text-xs text-muted-foreground">Reworded version for the author (optional — leave empty to share as written)</label>
                       <Textarea id={`edit-${c.id}`} rows={3} maxLength={10000} disabled={!editable} value={d.edited} onChange={(e) => setDrafts((s) => ({ ...s, [c.id]: { ...s[c.id]!, edited: e.target.value } }))} />
+                      <FieldValidation schema={reviewCommentSchema} value={d.edited} />
                     </div>
                   )}
                 </div>
@@ -100,7 +104,7 @@ function ReviewsInner({ article }: { article: EditorArticleDetail }) {
       ))}
 
       <div className="flex items-center gap-3">
-        <LoadingButton loading={save.isPending} disabled={!editable || Object.keys(drafts).length === 0} onClick={() => save.mutate()}>
+        <LoadingButton loading={save.isPending} disabled={!editable || Object.keys(drafts).length === 0 || Object.values(drafts).some((x) => !!firstError(reviewCommentSchema, x.edited))} onClick={() => save.mutate()}>
           <Save className="size-4" /> Save disclosure choices
         </LoadingButton>
         <span className="text-sm text-muted-foreground">{approvedCount} comment(s) will be shared</span>

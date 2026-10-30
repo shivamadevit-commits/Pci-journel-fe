@@ -42,3 +42,13 @@ export const publicationMetadataSchema = z.object({
   citation: v.optionalText('Citation', v.LIMITS.note),
 });
 export type PublicationMetadataValues = z.infer<typeof publicationMetadataSchema>;
+
+// ── Small state-driven inputs (dialogs and inline fields) ─────────────────────
+export const declineReasonSchema = v.requiredText('Reason', v.LIMITS.note, 5);
+export const replaceReasonSchema = v.optionalText('Reason', 1000);
+export const decisionNoteSchema = v.optionalText('Note', v.LIMITS.longNote);
+export const eligibilityNotesSchema = v.optionalText('Eligibility notes', v.LIMITS.longNote);
+export const routeReasonSchema = v.requiredText('Reason', v.LIMITS.longNote, 5);
+export const reviewCommentSchema = v.optionalText('Comment', v.LIMITS.review);
+export const reviewDueDateSchema = (min: string) => v.isoDate('Due date', { min });
+export const publicationDateSchema = (max: string) => v.isoDate('Publication date', { max });

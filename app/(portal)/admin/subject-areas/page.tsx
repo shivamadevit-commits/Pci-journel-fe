@@ -1,5 +1,8 @@
 'use client';
 
+import { FieldValidation } from '@/components/forms/field-validation';
+import { subjectAreaNameSchema } from '@/lib/schemas/admin';
+import { firstError } from '@/lib/validation';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
@@ -50,9 +53,9 @@ export default function SubjectAreasPage() {
         <Card>
           <CardHeader><CardTitle>Add subject area</CardTitle><CardDescription>Names must be unique.</CardDescription></CardHeader>
           <CardContent>
-            <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (name.trim()) create.mutate(); }}>
-              <Input aria-label="New subject area name" value={name} maxLength={120} onChange={(e) => setName(e.target.value)} placeholder="e.g. Pharmaceutical Analysis" />
-              <LoadingButton type="submit" loading={create.isPending} disabled={!name.trim()}><Plus className="size-4" /> Add</LoadingButton>
+            <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (!firstError(subjectAreaNameSchema, name)) create.mutate(); }}>
+              <div className="flex-1 space-y-1"><Input aria-label="New subject area name" aria-invalid={!!name && !!firstError(subjectAreaNameSchema, name)} value={name} maxLength={120} onChange={(e) => setName(e.target.value)} placeholder="e.g. Pharmaceutical Analysis" /><FieldValidation schema={subjectAreaNameSchema} value={name} /></div>
+              <LoadingButton type="submit" loading={create.isPending} disabled={!!firstError(subjectAreaNameSchema, name)}><Plus className="size-4" /> Add</LoadingButton>
             </form>
           </CardContent>
         </Card>
@@ -72,8 +75,8 @@ function RenameInline({ area, onSave }: { area: SubjectArea; onSave: (name: stri
     );
   }
   return (
-    <form className="flex flex-1 gap-2" onSubmit={(e) => { e.preventDefault(); if (value.trim() && value.trim() !== area.name) onSave(value.trim()); setEditing(false); }}>
-      <Input autoFocus aria-label="Subject area name" value={value} maxLength={120} onChange={(e) => setValue(e.target.value)} />
+    <form className="flex flex-1 gap-2" onSubmit={(e) => { e.preventDefault(); if (firstError(subjectAreaNameSchema, value)) return; if (value.trim() !== area.name) onSave(value.trim()); setEditing(false); }}>
+      <div className="flex-1 space-y-1"><Input autoFocus aria-label="Subject area name" aria-invalid={!!firstError(subjectAreaNameSchema, value)} value={value} maxLength={120} onChange={(e) => setValue(e.target.value)} /><FieldValidation schema={subjectAreaNameSchema} value={value} /></div>
       <Button type="submit" size="sm">Save</Button>
       <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
     </form>

@@ -39,3 +39,14 @@ export type ConfigInput = z.input<typeof configSchema>;
 export type ConfigValues = z.output<typeof configSchema>;
 
 export const subjectAreaNameSchema = v.requiredText('Name', 120, 2);
+
+export const auditFilterSchema = z
+  .object({
+    action: v.optionalText('Event prefix', 100),
+    entityType: v.optionalText('Entity type', 100),
+    entityId: v.optionalText('Entity ID', 100),
+    from: v.isoDate('From date'),
+    to: v.isoDate('To date'),
+  })
+  .refine((f) => !f.from || !f.to || f.from <= f.to, { path: ['to'], message: 'To date cannot be before the From date' });
+export type AuditFilterValues = z.infer<typeof auditFilterSchema>;

@@ -1,5 +1,8 @@
 'use client';
 
+import { FieldValidation } from '@/components/forms/field-validation';
+import { replaceReasonSchema, reviewDueDateSchema } from '@/lib/schemas/editorial';
+import { firstError } from '@/lib/validation';
 import { useState } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { AlertTriangle, BellRing, CheckCircle2, Repeat, Users } from 'lucide-react';
@@ -213,12 +216,13 @@ function AssignDialog({ article, onClose }: { article: EditorArticleDetail; onCl
         <ReviewerPicker article={article} selected={selected} max={2} onChange={setSelected} />
         <Field>
           <FieldLabel htmlFor="due">Review due date (optional)</FieldLabel>
-          <Input id="due" type="date" min={minDate} value={due} onChange={(e) => setDue(e.target.value)} className="sm:w-56" />
+          <Input id="due" type="date" min={minDate} value={due} onChange={(e) => setDue(e.target.value)} className="sm:w-56" aria-invalid={!!firstError(reviewDueDateSchema(minDate), due)} />
+          <FieldValidation schema={reviewDueDateSchema(minDate)} value={due} />
         </Field>
         <DialogFooter className="items-center">
           <span className="mr-auto text-sm text-muted-foreground">{selected.length} of 2 selected</span>
           <Button variant="ghost" onClick={onClose} disabled={assign.isPending}>Cancel</Button>
-          <LoadingButton loading={assign.isPending} disabled={selected.length !== 2 || blocked || loading} onClick={() => assign.mutate()}>Assign reviewers</LoadingButton>
+          <LoadingButton loading={assign.isPending} disabled={selected.length !== 2 || blocked || loading || !!firstError(reviewDueDateSchema(minDate), due)} onClick={() => assign.mutate()}>Assign reviewers</LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -246,10 +250,11 @@ function ReplaceDialog({ article, row, onClose }: { article: EditorArticleDetail
         <Field>
           <FieldLabel htmlFor="reason">Reason (optional)</FieldLabel>
           <Textarea id="reason" rows={2} value={reason} maxLength={1000} onChange={(e) => setReason(e.target.value)} />
+          <FieldValidation schema={replaceReasonSchema} value={reason} />
         </Field>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} disabled={replace.isPending}>Cancel</Button>
-          <LoadingButton loading={replace.isPending} disabled={selected.length !== 1 || blocked || loading} onClick={() => replace.mutate()}>Replace reviewer</LoadingButton>
+          <LoadingButton loading={replace.isPending} disabled={selected.length !== 1 || blocked || loading || !!firstError(replaceReasonSchema, reason)} onClick={() => replace.mutate()}>Replace reviewer</LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

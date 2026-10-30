@@ -1,5 +1,8 @@
 'use client';
 
+import { FieldValidation } from '@/components/forms/field-validation';
+import { decisionNoteSchema, routeReasonSchema } from '@/lib/schemas/editorial';
+import { firstError } from '@/lib/validation';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, FileCode2, FileText, PackageCheck, PlayCircle, Send, Upload, UserPlus } from 'lucide-react';
@@ -126,6 +129,7 @@ function UploadProofDialog({ articleId, onClose, hold }: { articleId: string; on
         <Field>
           <FieldLabel htmlFor="pnotes">Notes for the author (optional)</FieldLabel>
           <Textarea id="pnotes" rows={3} maxLength={3000} value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <FieldValidation schema={decisionNoteSchema} value={notes} />
         </Field>
         <Field orientation="horizontal">
           <Checkbox id="sendnow" checked={sendNow} disabled={hold} onCheckedChange={(c) => setSendNow(c === true)} />
@@ -133,7 +137,7 @@ function UploadProofDialog({ articleId, onClose, hold }: { articleId: string; on
         </Field>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} disabled={upload.isPending}>Cancel</Button>
-          <LoadingButton loading={upload.isPending} onClick={() => (file ? upload.mutate() : setErr('Choose the proof file.'))}>Upload</LoadingButton>
+          <LoadingButton loading={upload.isPending} disabled={!!firstError(decisionNoteSchema, notes)} onClick={() => (file ? upload.mutate() : setErr('Choose the proof file.'))}>Upload</LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -205,10 +209,11 @@ function CorrectionDialog({ articleId, c, kind, onClose }: { articleId: string; 
         <Field>
           <FieldLabel htmlFor="ctext">{implement ? 'Note (optional)' : 'Why is this a major content change?'}</FieldLabel>
           <Textarea id="ctext" rows={3} maxLength={3000} value={text} onChange={(e) => setText(e.target.value)} />
+          <FieldValidation schema={implement ? decisionNoteSchema : routeReasonSchema} value={text} />
         </Field>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} disabled={act.isPending}>Cancel</Button>
-          <LoadingButton loading={act.isPending} disabled={!implement && text.trim().length < 5} onClick={() => act.mutate()}>{implement ? 'Confirm' : 'Route to Editor'}</LoadingButton>
+          <LoadingButton loading={act.isPending} disabled={!!firstError(implement ? decisionNoteSchema : routeReasonSchema, text)} onClick={() => act.mutate()}>{implement ? 'Confirm' : 'Route to Editor'}</LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

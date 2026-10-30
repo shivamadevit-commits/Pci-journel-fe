@@ -1,5 +1,8 @@
 'use client';
 
+import { FieldValidation } from '@/components/forms/field-validation';
+import { publicationDateSchema } from '@/lib/schemas/editorial';
+import { firstError } from '@/lib/validation';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, CircleAlert, Rocket } from 'lucide-react';
@@ -75,16 +78,17 @@ export function PublicationPanel({ article }: { article: EditorArticleDetail }) 
                     )}
                     <Field className="sm:w-64">
                       <FieldLabel htmlFor="pubdate">Publication date</FieldLabel>
-                      <Input id="pubdate" type="date" max={new Date().toISOString().slice(0, 10)} value={date} onChange={(e) => setDate(e.target.value)} />
+                      <Input id="pubdate" type="date" max={new Date().toISOString().slice(0, 10)} value={date} onChange={(e) => setDate(e.target.value)} aria-invalid={!!firstError(publicationDateSchema(new Date().toISOString().slice(0, 10)), date)} />
+                      <FieldValidation schema={publicationDateSchema(new Date().toISOString().slice(0, 10))} value={date} />
                       <FieldDescription>Defaults to today.</FieldDescription>
                     </Field>
                     <ConfirmDialog
                       title="Publish this article?"
                       description="The article becomes publicly visible as HTML and PDF and the author is notified."
                       confirmLabel="Publish"
-                      disabled={!ready}
+                      disabled={!ready || !!firstError(publicationDateSchema(new Date().toISOString().slice(0, 10)), date)}
                       onConfirm={() => publish.mutateAsync()}
-                      trigger={<LoadingButton loading={publish.isPending} disabled={!ready}>Authorise publication…</LoadingButton>}
+                      trigger={<LoadingButton loading={publish.isPending} disabled={!ready || !!firstError(publicationDateSchema(new Date().toISOString().slice(0, 10)), date)}>Authorise publication…</LoadingButton>}
                     />
                   </>
                 ) : (

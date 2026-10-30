@@ -79,10 +79,12 @@ export const otp = z
   .trim()
   .regex(new RegExp(`^\\d{${LIMITS.otp.min},${LIMITS.otp.max}}$`), 'Enter the numeric code from the email');
 
-export const phone = optionalPattern('Phone number', PHONE_RE, LIMITS.phone.max, 'Enter a valid phone number').refine(
-  (s) => !s || s.replace(/\D/g, '').length >= 6,
-  'Enter a valid phone number',
-);
+export const phone = z
+  .string()
+  .trim()
+  .max(LIMITS.phone.max, `Phone number must be at most ${LIMITS.phone.max} characters`)
+  .refine((s) => s === '' || (PHONE_RE.test(s) && s.replace(/\D/g, '').length >= 6), 'Enter a valid phone number')
+  .optional();
 
 export const doi = optionalPattern('DOI', DOI_RE, 200, 'DOI must look like 10.xxxx/yyyy');
 

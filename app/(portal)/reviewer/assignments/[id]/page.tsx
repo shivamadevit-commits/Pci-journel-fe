@@ -1,5 +1,8 @@
 'use client';
 
+import { FieldValidation } from '@/components/forms/field-validation';
+import { declineReasonSchema, reviewCommentSchema } from '@/lib/schemas/editorial';
+import { firstError } from '@/lib/validation';
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -136,6 +139,7 @@ ${c.body}` : c.body;
 
   function validate(): boolean {
     const e: typeof errors = {};
+    if (COMMENT_SECTIONS.some((s) => firstError(reviewCommentSchema, sections[s.value] ?? ''))) e.comments = 'One of your comments is too long (10,000 characters maximum).';
     if (!rec) e.rec = 'Choose a recommendation.';
     if (!comments.some((c) => c.section !== 'CONFIDENTIAL_TO_EDITOR')) e.comments = 'Add at least one comment that is not marked confidential to the editor.';
     setErrors(e);
@@ -169,6 +173,7 @@ ${c.body}` : c.body;
               {s.value === 'CONFIDENTIAL_TO_EDITOR' && <Badge variant="outline" className="ml-2">Never shown to authors</Badge>}
             </FieldLabel>
             <Textarea id={`sec-${s.value}`} rows={s.value === 'SUMMARY' ? 6 : 3} maxLength={10000} value={sections[s.value] ?? ''} onChange={(e) => { setSections((x) => ({ ...x, [s.value]: e.target.value })); setErrors((er) => ({ ...er, comments: undefined })); }} />
+            <FieldValidation schema={reviewCommentSchema} value={sections[s.value] ?? ''} />
           </Field>
         ))}
         {errors.comments && <FieldError>{errors.comments}</FieldError>}
@@ -204,10 +209,11 @@ function DeclineDialog({ assignmentId, onClose, onDone }: { assignmentId: string
         <Field>
           <FieldLabel htmlFor="reason">Reason</FieldLabel>
           <Textarea id="reason" rows={3} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} />
+          <FieldValidation schema={declineReasonSchema} value={reason} />
         </Field>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} disabled={decline.isPending}>Cancel</Button>
-          <LoadingButton variant="destructive" loading={decline.isPending} disabled={reason.trim().length < 5} onClick={() => decline.mutate()}>Decline</LoadingButton>
+          <LoadingButton variant="destructive" loading={decline.isPending} disabled={!!firstError(declineReasonSchema, reason)} onClick={() => decline.mutate()}>Decline</LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

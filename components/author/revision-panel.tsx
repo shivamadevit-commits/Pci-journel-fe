@@ -1,5 +1,7 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { revisionSchema, type RevisionValues } from '@/lib/schemas/article';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { api } from '@/lib/api-client';
@@ -14,12 +16,12 @@ export function RevisionPanel({ articleId }: { articleId: string }) {
   const [manuscript, setManuscript] = useState<File | null>(null);
   const [titlePage, setTitlePage] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string>();
-  const form = useForm<{ changeNote: string }>({ defaultValues: { changeNote: '' } });
+  const form = useForm<RevisionValues>({ resolver: zodResolver(revisionSchema), defaultValues: { changeNote: '' } });
 
   const upload = useAction({
-    fn: (v: { changeNote: string }) => {
+    fn: (v: RevisionValues) => {
       const fd = new FormData();
-      if (v.changeNote.trim()) fd.append('changeNote', v.changeNote.trim());
+      if (v.changeNote?.trim()) fd.append('changeNote', v.changeNote.trim());
       fd.append('manuscript', manuscript!);
       if (titlePage) fd.append('titlePage', titlePage);
       return api.upload('POST', `/author/articles/${articleId}/versions`, fd);

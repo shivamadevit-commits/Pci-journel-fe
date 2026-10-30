@@ -16,7 +16,7 @@ export function StatCard({ label, value, icon: Icon, href, tone }: { label: stri
     </Card>
   );
   return href ? (
-    <Link href={href} className="block rounded-xl focus-visible:ring-2 focus-visible:ring-ring">
+    <Link href={href} className="block rounded-lg focus-visible:ring-2 focus-visible:ring-ring">
       {body}
     </Link>
   ) : (

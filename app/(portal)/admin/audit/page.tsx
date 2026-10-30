@@ -1,5 +1,6 @@
 'use client';
 
+import { auditFilterSchema } from '@/lib/schemas/admin';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
@@ -9,7 +10,7 @@ import { useListState } from '@/hooks/use-list-state';
 import type { AuditRow } from '@/types/domain';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Field, FieldLabel } from '@/components/ui/field';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/shared/page-header';
 import { DataTable, PaginationBar, type Column } from '@/components/tables/data-table';
@@ -19,6 +20,7 @@ const DEFAULTS = { page: '1', action: '', entityType: '', entityId: '', from: ''
 export default function AuditPage() {
   const { state, set, reset, page } = useListState(DEFAULTS);
   const [open, setOpen] = useState<AuditRow | null>(null);
+  const [draftErrors, setDraftErrors] = useState<Record<string, string>>({});
   const [draft, setDraft] = useState({ action: state.action, entityType: state.entityType, entityId: state.entityId, from: state.from, to: state.to });
 
   const q = useQuery({
@@ -48,17 +50,23 @@ export default function AuditPage() {
     <>
       <PageHeader title="Audit log" description="Append-only record of important actions. Entries cannot be edited or deleted." />
       <form
-        className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6"
-        onSubmit={(e) => { e.preventDefault(); set({ ...draft }); }}
+        className="mb-4 grid gap-3 rounded-lg border bg-card p-4 shadow-xs sm:grid-cols-2 lg:grid-cols-6"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const parsed = auditFilterSchema.safeParse(draft);
+          if (!parsed.success) return setDraftErrors(Object.fromEntries(parsed.error.issues.map((i) => [String(i.path[0]), i.message])));
+          setDraftErrors({});
+          set({ ...draft });
+        }}
       >
-        <Field><FieldLabel htmlFor="a-action">Event prefix</FieldLabel><Input id="a-action" placeholder="e.g. article. or auth.login" value={draft.action} onChange={(e) => setDraft({ ...draft, action: e.target.value })} /></Field>
-        <Field><FieldLabel htmlFor="a-type">Entity type</FieldLabel><Input id="a-type" placeholder="e.g. Article" value={draft.entityType} onChange={(e) => setDraft({ ...draft, entityType: e.target.value })} /></Field>
-        <Field><FieldLabel htmlFor="a-id">Entity ID</FieldLabel><Input id="a-id" value={draft.entityId} onChange={(e) => setDraft({ ...draft, entityId: e.target.value })} /></Field>
-        <Field><FieldLabel htmlFor="a-from">From</FieldLabel><Input id="a-from" type="date" value={draft.from} onChange={(e) => setDraft({ ...draft, from: e.target.value })} /></Field>
-        <Field><FieldLabel htmlFor="a-to">To</FieldLabel><Input id="a-to" type="date" value={draft.to} onChange={(e) => setDraft({ ...draft, to: e.target.value })} /></Field>
+        <Field><FieldLabel htmlFor="a-action">Event prefix</FieldLabel><Input id="a-action" maxLength={100} aria-invalid={!!draftErrors.action} placeholder="e.g. article. or auth.login" value={draft.action} onChange={(e) => setDraft({ ...draft, action: e.target.value })} /></Field>
+        <Field><FieldLabel htmlFor="a-type">Entity type</FieldLabel><Input id="a-type" maxLength={100} aria-invalid={!!draftErrors.entityType} placeholder="e.g. Article" value={draft.entityType} onChange={(e) => setDraft({ ...draft, entityType: e.target.value })} /></Field>
+        <Field><FieldLabel htmlFor="a-id">Entity ID</FieldLabel><Input id="a-id" maxLength={100} aria-invalid={!!draftErrors.entityId} value={draft.entityId} onChange={(e) => setDraft({ ...draft, entityId: e.target.value })} /></Field>
+        <Field><FieldLabel htmlFor="a-from">From</FieldLabel><Input id="a-from" type="date" aria-invalid={!!draftErrors.from} value={draft.from} onChange={(e) => setDraft({ ...draft, from: e.target.value })} /></Field>
+        <Field><FieldLabel htmlFor="a-to">To</FieldLabel><Input id="a-to" type="date" min={draft.from || undefined} aria-invalid={!!draftErrors.to} value={draft.to} onChange={(e) => setDraft({ ...draft, to: e.target.value })} />{draftErrors.to && <FieldError>{draftErrors.to}</FieldError>}</Field>
         <div className="flex items-end gap-2">
           <Button type="submit">Apply</Button>
-          <Button type="button" variant="ghost" onClick={() => { setDraft({ action: '', entityType: '', entityId: '', from: '', to: '' }); reset(); }}>Clear</Button>
+          <Button type="button" variant="ghost" onClick={() => { setDraft({ action: '', entityType: '', entityId: '', from: '', to: '' }); setDraftErrors({}); reset(); }}>Clear</Button>
         </div>
       </form>
       <DataTable columns={columns} rows={q.data?.data} getKey={(r) => r.id} loading={q.isLoading} error={q.error} onRetry={() => q.refetch()} empty={{ title: 'No audit events match' }} />

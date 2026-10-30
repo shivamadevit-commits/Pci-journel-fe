@@ -1,5 +1,8 @@
 'use client';
 
+import { FieldValidation } from '@/components/forms/field-validation';
+import { eligibilityNotesSchema } from '@/lib/schemas/editorial';
+import { firstError } from '@/lib/validation';
 import { use, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
@@ -96,8 +99,9 @@ function ManageCard({ reviewer: r, invalidate }: { reviewer: ReviewerProfileRow;
         <Field>
           <FieldLabel htmlFor="notes">Eligibility notes (editors only)</FieldLabel>
           <Textarea id="notes" rows={4} maxLength={3000} value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <FieldValidation schema={eligibilityNotesSchema} value={notes} />
         </Field>
-        <LoadingButton loading={save.isPending} disabled={selected.length === 0} onClick={() => save.mutate()}>Save changes</LoadingButton>
+        <LoadingButton loading={save.isPending} disabled={selected.length === 0 || !!firstError(eligibilityNotesSchema, notes)} onClick={() => save.mutate()}>Save changes</LoadingButton>
       </CardContent>
     </Card>
   );

@@ -1,5 +1,8 @@
 'use client';
 
+import { FieldValidation } from '@/components/forms/field-validation';
+import { decisionNoteSchema } from '@/lib/schemas/editorial';
+import { firstError } from '@/lib/validation';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -82,10 +85,11 @@ function DecisionDialog({ row, decision, onClose }: { row: MajorChangeRow; decis
         <Field>
           <FieldLabel htmlFor="note">Note for production (optional)</FieldLabel>
           <Textarea id="note" rows={3} maxLength={3000} value={note} onChange={(e) => setNote(e.target.value)} />
+          <FieldValidation schema={decisionNoteSchema} value={note} />
         </Field>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose} disabled={submit.isPending}>Cancel</Button>
-          <LoadingButton variant={approve ? 'default' : 'destructive'} loading={submit.isPending} onClick={() => submit.mutate()}>{approve ? 'Approve change' : 'Reject change'}</LoadingButton>
+          <LoadingButton variant={approve ? 'default' : 'destructive'} loading={submit.isPending} disabled={!!firstError(decisionNoteSchema, note)} onClick={() => submit.mutate()}>{approve ? 'Approve change' : 'Reject change'}</LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

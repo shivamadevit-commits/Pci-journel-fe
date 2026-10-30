@@ -39,7 +39,7 @@ export function ListToolbar({ search, onSearch, placeholder = 'Search…', filte
     <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
       <div className="relative sm:w-72">
         <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-muted-foreground" aria-hidden />
-        <Input value={text} onChange={(e) => change(e.target.value)} placeholder={placeholder} aria-label="Search" className="pl-8" />
+        <Input value={text} maxLength={100} onChange={(e) => change(e.target.value)} placeholder={placeholder} aria-label="Search" className="pl-8" />
       </div>
       {filters.map((f) => (
         <Select key={f.key} value={f.value || ALL} onValueChange={(v) => f.onChange(v === ALL ? '' : v)}>

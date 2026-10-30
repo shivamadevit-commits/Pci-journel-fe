@@ -1,5 +1,8 @@
 'use client';
 
+import { FieldValidation } from '@/components/forms/field-validation';
+import { decisionNoteSchema } from '@/lib/schemas/editorial';
+import { firstError } from '@/lib/validation';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Check, X } from 'lucide-react';
@@ -121,11 +124,12 @@ function ApplicationDialog({ app, onClose }: { app: ReviewerApplicationRow; onCl
             <Field>
               <FieldLabel htmlFor="note">Decision note (optional)</FieldLabel>
               <Textarea id="note" rows={3} maxLength={3000} value={note} onChange={(e) => setNote(e.target.value)} />
+              <FieldValidation schema={decisionNoteSchema} value={note} />
             </Field>
             <DialogFooter>
               <Button variant="ghost" onClick={onClose} disabled={busy}>Close</Button>
-              <LoadingButton variant="destructive" loading={reject.isPending} disabled={busy} onClick={() => reject.mutate()}><X className="size-4" /> Reject</LoadingButton>
-              <LoadingButton loading={approve.isPending} disabled={busy} onClick={async () => { try { setResult(await approve.mutateAsync().then((r) => r.data)); } catch { /* toast shown */ } }}><Check className="size-4" /> Approve &amp; issue Reviewer ID</LoadingButton>
+              <LoadingButton variant="destructive" loading={reject.isPending} disabled={busy || !!firstError(decisionNoteSchema, note)} onClick={() => reject.mutate()}><X className="size-4" /> Reject</LoadingButton>
+              <LoadingButton loading={approve.isPending} disabled={busy || !!firstError(decisionNoteSchema, note)} onClick={async () => { try { setResult(await approve.mutateAsync().then((r) => r.data)); } catch { /* toast shown */ } }}><Check className="size-4" /> Approve &amp; issue Reviewer ID</LoadingButton>
             </DialogFooter>
           </>
         ) : (
