@@ -23,8 +23,8 @@ const AREA_ROLES: Record<string, Role[]> = {
   '/author': ['AUTHOR'],
   '/reviewer': ['REVIEWER'],
   '/production': ['PRODUCTION'],
-  '/editor': ['EDITOR', 'CHIEF_EDITOR_ADMIN'],
-  '/admin': ['CHIEF_EDITOR_ADMIN'],
+  '/editor': ['EDITOR', 'ADMIN'],
+  '/admin': ['ADMIN'],
 };
 
 const initials = (f: string, l: string) => `${f[0] ?? ''}${l[0] ?? ''}`.toUpperCase();

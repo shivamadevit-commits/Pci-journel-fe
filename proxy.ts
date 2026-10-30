@@ -10,17 +10,18 @@ const AREA_ROLES: Record<string, string[]> = {
   '/author': ['AUTHOR'],
   '/reviewer': ['REVIEWER'],
   '/production': ['PRODUCTION'],
-  '/editor': ['EDITOR', 'CHIEF_EDITOR_ADMIN'],
-  '/admin': ['CHIEF_EDITOR_ADMIN'],
+  '/editor': ['EDITOR', 'ADMIN'],
+  '/admin': ['ADMIN'],
 };
-const HOME: Record<string, string> = { AUTHOR: '/author', REVIEWER: '/reviewer', PRODUCTION: '/production', EDITOR: '/editor', CHIEF_EDITOR_ADMIN: '/admin' };
+const HOME: Record<string, string> = { AUTHOR: '/author', REVIEWER: '/reviewer', PRODUCTION: '/production', EDITOR: '/editor', ADMIN: '/admin' };
 const SHARED = ['/notifications', '/profile'];
 const GUEST_ONLY = ['/login', '/register'];
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const hasSession = Boolean(req.cookies.get(RT_COOKIE)?.value);
-  const role = req.cookies.get(ROLE_COOKIE)?.value;
+  const rawRole = req.cookies.get(ROLE_COOKIE)?.value;
+  const role = rawRole === 'CHIEF_EDITOR_ADMIN' ? 'ADMIN' : rawRole; // cookie written before the role was renamed
 
   const area = Object.keys(AREA_ROLES).find((a) => pathname === a || pathname.startsWith(`${a}/`));
   const shared = SHARED.some((s) => pathname === s || pathname.startsWith(`${s}/`));

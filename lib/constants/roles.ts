@@ -1,9 +1,9 @@
 import { BookOpenCheck, ClipboardList, FileText, Gauge, Layers, LayoutDashboard, ScrollText, Settings2, ShieldCheck, Tags, UserCheck, Users, Bell, UserCog, FilePlus2, History, GitPullRequestArrow, Newspaper, type LucideIcon } from 'lucide-react';
 
-export type Role = 'CHIEF_EDITOR_ADMIN' | 'EDITOR' | 'REVIEWER' | 'AUTHOR' | 'PRODUCTION';
+export type Role = 'ADMIN' | 'EDITOR' | 'REVIEWER' | 'AUTHOR' | 'PRODUCTION';
 
 export const ROLE_LABELS: Record<Role, string> = {
-  CHIEF_EDITOR_ADMIN: 'Chief Editor / Admin',
+  ADMIN: 'Admin',
   EDITOR: 'Editor',
   REVIEWER: 'Reviewer',
   AUTHOR: 'Author',
@@ -15,7 +15,7 @@ export const ROLE_HOME: Record<Role, string> = {
   REVIEWER: '/reviewer',
   PRODUCTION: '/production',
   EDITOR: '/editor',
-  CHIEF_EDITOR_ADMIN: '/admin',
+  ADMIN: '/admin',
 };
 
 export interface NavItem {
@@ -83,7 +83,7 @@ export const NAV: Record<Role, NavGroup[]> = {
     account,
   ],
   EDITOR: [editorial, account],
-  CHIEF_EDITOR_ADMIN: [
+  ADMIN: [
     {
       label: 'Administration',
       items: [

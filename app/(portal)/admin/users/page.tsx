@@ -28,7 +28,8 @@ import type { Tone } from '@/lib/constants/status';
 
 const DEFAULTS = { page: '1', search: '', role: '', status: '', sortBy: 'createdAt', sortOrder: 'desc' };
 const STATUS_TONE: Record<AdminUserRow['status'], Tone> = { ACTIVE: 'success', PENDING_VERIFICATION: 'warning', INACTIVE: 'neutral', SUSPENDED: 'danger' };
-const STAFF_ROLES: Role[] = ['CHIEF_EDITOR_ADMIN', 'EDITOR', 'PRODUCTION'];
+// There is a single Admin; the UI can only create Editors and Production team members and switch between them.
+const STAFF_ROLES: Role[] = ['EDITOR', 'PRODUCTION'];
 
 export default function AdminUsersPage() {
   const me = useMe();
@@ -162,7 +163,7 @@ function ChangeRoleDialog({ user, onClose, invalidate }: { user: AdminUserRow; o
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Change role for {user.firstName} {user.lastName}</DialogTitle>
-          <DialogDescription>Their sessions are signed out and the new role applies at the next sign-in. Roles can only change between Chief Editor, Editor and Production.</DialogDescription>
+          <DialogDescription>Their sessions are signed out and the new role applies at the next sign-in. Roles can only change between Editor and Production Team.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-2">
           {STAFF_ROLES.map((r) => (

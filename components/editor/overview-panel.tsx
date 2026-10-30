@@ -81,7 +81,7 @@ export function OverviewPanel({ article: a, role }: { article: EditorArticleDeta
         </CardContent>
       </Card>
 
-      {role === 'CHIEF_EDITOR_ADMIN' && <AssignEditorCard article={a} />}
+      {role === 'ADMIN' && <AssignEditorCard article={a} />}
     </div>
   );
 }
@@ -95,7 +95,7 @@ function AssignEditorCard({ article }: { article: EditorArticleDetail }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><UserCog className="size-5" /> Editor assignment</CardTitle>
-        <CardDescription>Chief Editor / Admin only.</CardDescription>
+        <CardDescription>Admin only.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Select value={editorId || undefined} onValueChange={setEditorId} disabled={closed}>

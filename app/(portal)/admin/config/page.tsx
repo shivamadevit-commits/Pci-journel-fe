@@ -24,7 +24,7 @@ export default function ConfigPage() {
   const q = useQuery({ queryKey: ['admin', 'config'], queryFn: async () => (await api.get<PortalConfig>('/admin/config')).data });
   return (
     <>
-      <PageHeader title="Portal configuration" description="Journal rules the Chief Editor can adjust. Changes apply immediately and are recorded in the audit log." />
+      <PageHeader title="Portal configuration" description="Journal rules the Admin can adjust. Changes apply immediately and are recorded in the audit log." />
       <QueryBoundary query={q}>{(c) => <ConfigForm config={c} />}</QueryBoundary>
     </>
   );

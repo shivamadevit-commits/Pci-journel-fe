@@ -16,7 +16,7 @@ export default function AdminDashboardPage() {
   const q = useQuery({ queryKey: ['admin', 'dashboard'], queryFn: async () => (await api.get<AdminDashboard>('/admin/dashboard')).data });
   return (
     <>
-      <PageHeader title="Administration" description="Portal oversight for the Chief Editor / Admin." />
+      <PageHeader title="Administration" description="Portal oversight for the Admin." />
       <QueryBoundary query={q}>
         {(d) => {
           const activeUsers = d.users.filter((u) => u.status === 'ACTIVE').reduce((a, u) => a + u.count, 0);

@@ -51,7 +51,7 @@ export function PublicationPanel({ article }: { article: EditorArticleDetail }) 
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Rocket className="size-5" /> Publication</CardTitle>
-                <CardDescription>The Editor / Chief Editor authorises publication once production is complete and all required items are present.</CardDescription>
+                <CardDescription>The Editor / Admin authorises publication once production is complete and all required items are present.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-wrap gap-2">

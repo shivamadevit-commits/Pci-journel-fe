@@ -7,7 +7,7 @@ export const staffSchema = z.object({
   firstName: v.personName('First name'),
   lastName: v.personName('Last name'),
   email: v.email,
-  role: v.requiredSelect(['CHIEF_EDITOR_ADMIN', 'EDITOR', 'PRODUCTION'], 'Choose a role'),
+  role: v.requiredSelect(['EDITOR', 'PRODUCTION'], 'Choose a role'),
   designation: v.optionalText('Designation', v.LIMITS.shortText),
 });
 export type StaffValues = z.infer<typeof staffSchema>;

@@ -107,7 +107,7 @@ function ProfileCard() {
               </div>
             </>
           )}
-          {(u.role === 'EDITOR' || u.role === 'CHIEF_EDITOR_ADMIN') && (
+          {(u.role === 'EDITOR' || u.role === 'ADMIN') && (
             <>
               <TextField form={form} name="designation" label="Designation" />
             </>
