@@ -139,10 +139,10 @@ export default function LoginPage() {
   }
 
   return (
-    <Card>
+    <Card className="gap-6 py-8 shadow-lg ring-1 ring-border [--card-spacing:--spacing(8)] [&_[data-slot=button]]:h-10 [&_[data-slot=input]]:h-10">
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>Use your portal account. A verification code will be emailed to you.</CardDescription>
+        <CardTitle className="text-3xl font-bold tracking-tight">Welcome back</CardTitle>
+        <CardDescription className="text-base">Sign in to your portal account to continue.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onLogin)} className="space-y-4" noValidate>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { staffSchema, type StaffValues } from '@/lib/schemas/admin';
 import { toast } from 'sonner';
 import { MailPlus, MoreHorizontal, UserPlus } from 'lucide-react';
 import { api } from '@/lib/api-client';
@@ -111,14 +111,6 @@ export default function AdminUsersPage() {
   );
 }
 
-const staffSchema = z.object({
-  firstName: z.string().trim().min(1, 'Required').max(100),
-  lastName: z.string().trim().min(1, 'Required').max(100),
-  email: emailSchema,
-  role: z.enum(['CHIEF_EDITOR_ADMIN', 'EDITOR', 'PRODUCTION'], { error: 'Choose a role' }),
-  designation: z.string().trim().max(150).optional(),
-});
-type StaffValues = z.infer<typeof staffSchema>;
 const ROLE_OPTIONS = STAFF_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }));
 
 function CreateStaffDialog({ onClose, invalidate }: { onClose: () => void; invalidate: string[][] }) {

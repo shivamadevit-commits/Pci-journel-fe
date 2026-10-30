@@ -48,11 +48,16 @@ export function PageSkeleton() {
 
 export function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: number }) {
   return (
-    <div className="space-y-2" aria-busy="true" aria-label="Loading">
+    <div className="overflow-hidden rounded-lg border bg-card shadow-sm" aria-busy="true" aria-label="Loading">
+      <div className="flex gap-4 border-b-2 bg-muted/60 px-4 py-3.5">
+        {Array.from({ length: cols }).map((_, c) => (
+          <Skeleton key={c} className="h-3 flex-1 bg-muted-foreground/20" />
+        ))}
+      </div>
       {Array.from({ length: rows }).map((_, r) => (
-        <div key={r} className="flex gap-3">
+        <div key={r} className="flex gap-4 border-b px-4 py-3.5 last:border-0">
           {Array.from({ length: cols }).map((_, c) => (
-            <Skeleton key={c} className="h-9 flex-1" />
+            <Skeleton key={c} className="h-5 flex-1" />
           ))}
         </div>
       ))}

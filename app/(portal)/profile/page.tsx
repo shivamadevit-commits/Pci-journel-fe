@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { profileSchema, type ProfileValues } from '@/lib/schemas/admin';
 import { api } from '@/lib/api-client';
 import { useAction } from '@/lib/actions';
 import { ME_KEY, useMe } from '@/hooks/use-auth';
@@ -18,17 +18,6 @@ import { LoadingButton } from '@/components/shared/loading-button';
 import { PageHeader } from '@/components/shared/page-header';
 import { QueryBoundary } from '@/components/shared/states';
 
-const profileSchema = z.object({
-  firstName: z.string().trim().min(1, 'Required').max(100),
-  lastName: z.string().trim().min(1, 'Required').max(100),
-  affiliation: z.string().trim().max(250).optional(),
-  country: z.string().trim().max(100).optional(),
-  phone: z.string().trim().max(30).optional(),
-  designation: z.string().trim().max(150).optional(),
-  institution: z.string().trim().max(250).optional(),
-  qualificationNotes: z.string().trim().max(2000).optional(),
-});
-type ProfileValues = z.infer<typeof profileSchema>;
 
 export default function ProfilePage() {
   const me = useMe();

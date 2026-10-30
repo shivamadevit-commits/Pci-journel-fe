@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { manualPlagiarismSchema as manualSchema, notesSchema, type ManualPlagiarismValues as ManualValues, type NotesValues } from '@/lib/schemas/editorial';
 import { CheckCircle2, FileSearch, PlayCircle, ScanSearch, Send, XCircle } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { useAction } from '@/lib/actions';
@@ -21,8 +21,6 @@ import { EnumBadge } from '@/components/shared/status-badge';
 import { EmptyState } from '@/components/shared/states';
 import { refreshArticle } from './keys';
 
-const notesSchema = z.object({ notes: z.string().trim().max(5000).optional(), authorMessage: z.string().trim().max(5000).optional() });
-type NotesValues = z.infer<typeof notesSchema>;
 
 export function ScreeningPanel({ article }: { article: EditorArticleDetail }) {
   const id = article.id;
@@ -95,14 +93,6 @@ function ScreeningDecisionDialog({ articleId, decision, onClose }: { articleId: 
 
 // ───────────────────────────── plagiarism ─────────────────────────────
 
-const manualSchema = z.object({
-  similarityScore: z.number({ error: 'Enter a number' }).min(0, 'Min 0').max(100, 'Max 100'),
-  verdict: z.enum(['CLEAR', 'CONCERN'], { error: 'Choose a verdict' }),
-  provider: z.string().trim().max(100).optional(),
-  providerReference: z.string().trim().max(200).optional(),
-  notes: z.string().trim().max(5000).optional(),
-});
-type ManualValues = z.infer<typeof manualSchema>;
 
 const VERDICTS = [{ value: 'CLEAR', label: 'Clear – acceptable' }, { value: 'CONCERN', label: 'Concern – needs attention' }];
 

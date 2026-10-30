@@ -3,23 +3,13 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { publicationMetadataSchema as schema, type PublicationMetadataValues as Values } from '@/lib/schemas/editorial';
 import { api } from '@/lib/api-client';
 import { useAction } from '@/lib/actions';
 import type { PublicationMetadata } from '@/types/domain';
 import { TextField, TextareaField } from '@/components/forms/fields';
 import { LoadingButton } from '@/components/shared/loading-button';
 
-const schema = z.object({
-  doi: z.string().trim().refine((v) => v === '' || /^10\.\d{4,9}\/\S+$/.test(v), 'DOI must look like 10.xxxx/yyyy').optional(),
-  volume: z.string().trim().max(20).optional(),
-  issue: z.string().trim().max(20).optional(),
-  pages: z.string().trim().max(40).optional(),
-  license: z.string().trim().max(200).optional(),
-  copyright: z.string().trim().max(300).optional(),
-  citation: z.string().trim().max(2000).optional(),
-});
-type Values = z.infer<typeof schema>;
 
 const FIELDS = ['doi', 'volume', 'issue', 'pages', 'license', 'copyright', 'citation'] as const;
 

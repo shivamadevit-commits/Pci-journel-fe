@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -36,14 +37,15 @@ interface Props<T> {
 }
 
 export function DataTable<T>({ columns, rows, getKey, loading, error, onRetry, rowHref, empty, sort, onSort }: Props<T>) {
+  const router = useRouter();
   if (loading) return <TableSkeleton cols={Math.min(columns.length, 6)} />;
   if (error) return <ErrorState error={error} onRetry={onRetry} />;
   if (!rows || rows.length === 0) return <EmptyState title={empty?.title ?? 'No results'} description={empty?.description ?? 'Try adjusting your search or filters.'} action={empty?.action} />;
 
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
       <Table>
-        <TableHeader className="bg-muted/40">
+        <TableHeader className="border-b-2">
           <TableRow>
             {columns.map((c) => {
               const active = sort && c.sortKey && sort.sortBy === c.sortKey;
@@ -53,7 +55,7 @@ export function DataTable<T>({ columns, rows, getKey, loading, error, onRetry, r
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="-ml-2 h-7 gap-1 px-2 font-medium"
+                      className="-ml-2 h-7 gap-1 px-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase hover:text-foreground"
                       onClick={() => onSort({ sortBy: c.sortKey!, sortOrder: active && sort!.sortOrder === 'desc' ? 'asc' : 'desc' })}
                     >
                       {c.header}
@@ -71,11 +73,11 @@ export function DataTable<T>({ columns, rows, getKey, loading, error, onRetry, r
           {rows.map((row) => {
             const href = rowHref?.(row);
             return (
-              <TableRow key={getKey(row)} className={cn(href && 'cursor-pointer hover:bg-muted/50')}>
+              <TableRow key={getKey(row)} className={cn(href && 'cursor-pointer')} onClick={href ? (e) => { if (!(e.target as HTMLElement).closest('a,button,input,select,[role=button]')) router.push(href); } : undefined}>
                 {columns.map((c, i) => (
-                  <TableCell key={c.key} className={cn('align-top', c.className)}>
+                  <TableCell key={c.key} className={cn('align-middle', c.className)}>
                     {href && i === 0 ? (
-                      <Link href={href} className="font-medium hover:underline focus-visible:underline">
+                      <Link href={href} className="font-medium text-primary hover:underline focus-visible:underline">
                         {c.cell(row)}
                       </Link>
                     ) : (

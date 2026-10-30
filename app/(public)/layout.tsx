@@ -8,10 +8,9 @@ const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? 'PCI Journal Portal';
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-svh flex-col bg-background">
-      <div className="tricolor-bar" aria-hidden />
       <header className="gov-hero text-white">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <Link href="/articles" className="flex items-center gap-3 font-serif text-lg font-semibold">
+          <Link href="/articles" className="flex items-center gap-3 font-sans text-lg font-semibold">
             <span className="flex size-9 items-center justify-center rounded-md bg-[var(--saffron)] text-[oklch(0.2_0.05_258)]"><BookOpen className="size-5" /></span>
             {APP_NAME}
           </Link>

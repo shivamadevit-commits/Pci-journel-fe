@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild tooltip={APP_NAME}>
                 <Link href={ROLE_HOME[user.role]}>
-                  <span className="flex size-9 items-center justify-center rounded-md bg-[var(--saffron)] text-[oklch(0.2_0.05_258)] shadow-sm">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-[var(--saffron)] text-[oklch(0.2_0.05_258)] shadow-sm">
                     <BookOpen className="size-4" />
                   </span>
                   <span className="grid flex-1 text-left leading-tight">
@@ -151,7 +151,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <SidebarRail />
       </Sidebar>
       <SidebarInset>
-        <div className="tricolor-bar" aria-hidden />
         <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b bg-card/95 px-4 shadow-xs backdrop-blur">
           <SidebarTrigger aria-label="Toggle navigation" />
           <Separator orientation="vertical" className="mx-1 h-5" />

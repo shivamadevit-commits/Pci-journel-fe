@@ -1,8 +1,8 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { decisionSchema as schema, type DecisionValues as Values } from '@/lib/schemas/editorial';
 import { Gavel } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { useAction } from '@/lib/actions';
@@ -19,12 +19,6 @@ import { EnumBadge } from '@/components/shared/status-badge';
 import { LoadingButton } from '@/components/shared/loading-button';
 import { refreshArticle } from './keys';
 
-const schema = z.object({
-  decision: z.enum(['ACCEPT', 'REJECT', 'REQUEST_REVISION'], { error: 'Choose a decision' }),
-  notes: z.string().trim().max(5000).optional(),
-  authorMessage: z.string().trim().max(5000).optional(),
-});
-type Values = z.infer<typeof schema>;
 
 const LABEL: Record<string, string> = {
   PROCEED_TO_PLAGIARISM_CHECK: 'Proceeded to plagiarism check',
@@ -39,6 +33,7 @@ const LABEL: Record<string, string> = {
 export function DecisionPanel({ article }: { article: EditorArticleDetail }) {
   const canDecide = article.status === 'REVIEWS_RECEIVED' || article.status === 'UNDER_EDITORIAL_DECISION';
   const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { decision: undefined, notes: '', authorMessage: '' } });
+  const decisionValue = useWatch({ control: form.control, name: 'decision' });
   const decide = useAction({ fn: (v: Values) => api.post(`/editorial/articles/${article.id}/decision`, { decision: v.decision, notes: v.notes || undefined, authorMessage: v.authorMessage || undefined }), form, invalidate: refreshArticle(article.id) });
 
   const submitted = article.reviews.filter((r) => r.report).length;
@@ -71,14 +66,14 @@ export function DecisionPanel({ article }: { article: EditorArticleDetail }) {
                 title="Record this decision?"
                 description="The author will be notified. This decision cannot be edited afterwards."
                 confirmLabel="Record decision"
-                disabled={!form.watch('decision') || submitted < 2}
-                destructive={form.watch('decision') === 'REJECT'}
+                disabled={!decisionValue || submitted < 2}
+                destructive={decisionValue === 'REJECT'}
                 onConfirm={async () => {
                   const ok = await form.trigger();
                   if (!ok) throw new Error('invalid');
                   await decide.mutateAsync(form.getValues());
                 }}
-                trigger={<LoadingButton type="button" loading={decide.isPending} disabled={submitted < 2 || !form.watch('decision')}>Record decision…</LoadingButton>}
+                trigger={<LoadingButton type="button" loading={decide.isPending} disabled={submitted < 2 || !decisionValue}>Record decision…</LoadingButton>}
               />
             </form>
           ) : (

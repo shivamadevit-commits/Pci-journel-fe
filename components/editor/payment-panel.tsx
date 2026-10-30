@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { paymentSchema as schema, type PaymentValues as Values } from '@/lib/schemas/editorial';
 import { CreditCard } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { useAction } from '@/lib/actions';
@@ -17,14 +17,6 @@ import { PaymentBadge } from '@/components/shared/status-badge';
 import { KeyValue } from '@/components/shared/stat-card';
 import { refreshArticle } from './keys';
 
-const schema = z.object({
-  status: z.string().min(1, 'Choose a status'),
-  amount: z.string().trim().refine((v) => v === '' || (!Number.isNaN(Number(v)) && Number(v) >= 0), 'Enter a valid amount').optional(),
-  currency: z.string().trim().refine((v) => v === '' || /^[A-Za-z]{3}$/.test(v), 'Use a 3-letter currency code').optional(),
-  providerReference: z.string().trim().max(200).optional(),
-  note: z.string().trim().max(2000).optional(),
-});
-type Values = z.infer<typeof schema>;
 
 export function PaymentPanel({ article }: { article: EditorArticleDetail }) {
   const p = article.payment;

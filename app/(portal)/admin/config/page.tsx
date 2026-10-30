@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { configSchema as schema, PUBLICATION_META_FIELDS, type ConfigInput, type ConfigValues as Values } from '@/lib/schemas/admin';
 import { api } from '@/lib/api-client';
 import { useAction } from '@/lib/actions';
 import type { PortalConfig } from '@/types/domain';
@@ -17,21 +17,8 @@ import { LoadingButton } from '@/components/shared/loading-button';
 import { PageHeader } from '@/components/shared/page-header';
 import { QueryBoundary } from '@/components/shared/states';
 
-const META_FIELDS = ['doi', 'volume', 'issue', 'pages', 'license', 'copyright', 'citation'] as const;
+const META_FIELDS = PUBLICATION_META_FIELDS;
 
-const optionalInt = (min: number, max: number) => z.union([z.literal(''), z.number().int().min(min).max(max)]);
-const schema = z.object({
-  wordLimit: z.number({ error: 'Enter a number' }).int().min(1).max(200000),
-  paymentEnabled: z.boolean(),
-  apcEnforcement: z.enum(['none', 'flag', 'block']),
-  apcDefaultAmount: z.union([z.literal(''), z.number().min(0)]),
-  apcCurrency: z.string().trim().refine((v) => v === '' || /^[A-Za-z]{3}$/.test(v), 'Use a 3-letter code'),
-  allowRevisionAfterReview: z.boolean(),
-  reviewDueDays: optionalInt(1, 365),
-  reviewerMinYearsTeaching: z.number({ error: 'Enter a number' }).int().min(0).max(80),
-  publicationRequiredMetadata: z.array(z.enum(META_FIELDS)),
-});
-type Values = z.infer<typeof schema>;
 
 export default function ConfigPage() {
   const q = useQuery({ queryKey: ['admin', 'config'], queryFn: async () => (await api.get<PortalConfig>('/admin/config')).data });
