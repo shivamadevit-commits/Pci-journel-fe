@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { manualPlagiarismSchema as manualSchema, notesSchema, type ManualPlagiarismValues as ManualValues, type NotesValues } from '@/lib/schemas/editorial';
@@ -19,7 +20,7 @@ import { FileInput } from '@/components/shared/file-input';
 import { LoadingButton } from '@/components/shared/loading-button';
 import { EnumBadge } from '@/components/shared/status-badge';
 import { EmptyState } from '@/components/shared/states';
-import { refreshArticle } from './keys';
+import { articleKey, refreshArticle } from './keys';
 
 
 export function ScreeningPanel({ article }: { article: EditorArticleDetail }) {
@@ -103,8 +104,18 @@ export function PlagiarismPanel({ article }: { article: EditorArticleDetail }) {
   const [manualOpen, setManualOpen] = useState(false);
   const [clearance, setClearance] = useState<'CLEAR' | 'REJECT' | null>(null);
 
-  const initiate = useAction({ fn: () => api.post(`/editorial/articles/${id}/plagiarism/initiate`), invalidate });
+  // Built-in engine: returns at once with an IN_PROGRESS check and finishes in the background.
+  const run = useAction({ fn: () => api.post(`/editorial/articles/${id}/plagiarism/run`), invalidate });
   const latest = article.plagiarismChecks[0];
+  const running = latest?.status === 'IN_PROGRESS' || latest?.status === 'PENDING';
+
+  // Poll while a check is running so the result shows up without a manual reload.
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (!running) return;
+    const t = setInterval(() => void qc.invalidateQueries({ queryKey: articleKey(id) }), 3000);
+    return () => clearInterval(t);
+  }, [running, id, qc]);
   const hasClearCheck = article.plagiarismChecks.some((c) => c.status === 'COMPLETED' && c.verdict === 'CLEAR');
   const hasCompleted = article.plagiarismChecks.some((c) => c.status === 'COMPLETED');
 
@@ -112,11 +123,11 @@ export function PlagiarismPanel({ article }: { article: EditorArticleDetail }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><ScanSearch className="size-5" /> Plagiarism check</CardTitle>
-        <CardDescription>The check must be completed and cleared before reviewers can see the manuscript. If the provider API is unavailable, record the result manually.</CardDescription>
+        <CardDescription>The check must be completed and cleared before reviewers can see the manuscript. You can run the built-in check (internal database and web search) or record a result manually.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {article.plagiarismChecks.length === 0 ? (
-          <EmptyState title="No plagiarism check recorded" description={active ? 'Initiate a check through the provider, or record a result manually.' : 'Checks become available once the manuscript passes screening.'} />
+          <EmptyState title="No plagiarism check recorded" description={active ? 'Run the built-in check, or record a result manually.' : 'Checks become available once the manuscript passes screening.'} />
         ) : (
           <ul className="divide-y rounded-lg border text-sm">
             {article.plagiarismChecks.map((c) => (
@@ -128,8 +139,8 @@ export function PlagiarismPanel({ article }: { article: EditorArticleDetail }) {
         {active && (
           <>
             <div className="flex flex-wrap gap-2">
-              <LoadingButton variant="outline" loading={initiate.isPending} onClick={() => initiate.mutate()} disabled={latest?.status === 'IN_PROGRESS' || latest?.status === 'PENDING'}>
-                <Send className="size-4" /> Check via provider
+              <LoadingButton variant="outline" loading={run.isPending || running} onClick={() => run.mutate()} disabled={running}>
+                <Send className="size-4" /> {running ? 'Checking…' : 'Run plagiarism check'}
               </LoadingButton>
               <Button variant="outline" onClick={() => setManualOpen(true)}>Record result manually</Button>
             </div>
