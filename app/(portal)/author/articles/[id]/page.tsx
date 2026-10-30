@@ -1,12 +1,13 @@
 'use client';
 
-import { use } from 'react';
+import { use, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 import { useFeatures } from '@/hooks/use-features';
-import { api } from '@/lib/api-client';
+import { api, errorMessage } from '@/lib/api-client';
+import { openCashfreeCheckout } from '@/lib/cashfree';
 import { useAction } from '@/lib/actions';
 import { formatDate, formatDateTime, formatMoney } from '@/lib/format';
 import { sectionLabel } from '@/lib/constants/status';
@@ -231,13 +232,41 @@ export default function AuthorArticlePage({ params }: { params: Promise<{ id: st
 function PaymentCard({ article }: { article: AuthorArticleDetail }) {
   const p = article.payment;
   const checkout = useAction({
-    fn: () => api.post<{ checkoutUrl: string }>(`/author/articles/${article.id}/payment/checkout`),
+    fn: () => api.post<{ checkoutUrl?: string; paymentSessionId?: string; mode?: string }>(`/author/articles/${article.id}/payment/checkout`),
     success: false,
     onSuccess: (r) => {
       toast.info('Redirecting to the payment page…');
-      window.location.assign(r.checkoutUrl);
+      if (r.paymentSessionId) openCashfreeCheckout(r.paymentSessionId, r.mode).catch((e) => toast.error(errorMessage(e)));
+      else if (r.checkoutUrl) window.location.assign(r.checkoutUrl);
     },
   });
+
+  // Back from the gateway (?payment=return&order_id=…): confirm the real outcome with the backend, since the
+  // webhook may be delayed or unreachable (e.g. local development), then refresh the article.
+  const qc = useQueryClient();
+  const sp = useSearchParams();
+  const returned = sp.get('payment') === 'return';
+  useEffect(() => {
+    if (!returned) return;
+    let cancelled = false;
+    (async () => {
+      // The gateway can redirect the browser back a moment before it marks the order paid, so poll briefly.
+      for (let attempt = 0; attempt < 6 && !cancelled; attempt++) {
+        const { data } = await api.post<{ status: string }>(`/author/articles/${article.id}/payment/verify`);
+        if (data.status === 'PAID') toast.success('Payment received. Thank you!');
+        else if (data.status === 'FAILED') toast.error('The payment did not go through. You can try again.');
+        if (data.status === 'PAID' || data.status === 'FAILED') {
+          await qc.invalidateQueries({ queryKey: ['author', 'article', article.id] });
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 2500));
+      }
+      if (!cancelled) toast.info('Your payment is still being processed. Refresh in a minute.');
+    })().catch((e) => toast.error(errorMessage(e)));
+    return () => {
+      cancelled = true;
+    };
+  }, [returned, article.id, qc]);
   const due = p && (p.status === 'PENDING' || p.status === 'FAILED');
   return (
     <Card>
